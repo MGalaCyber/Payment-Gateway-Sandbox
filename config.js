@@ -4,7 +4,7 @@ module.exports = {
     System: {
         Port: process.env.PORT,
         Mode: process.env.MODE === "development" ? true: false,
-        Webhook: process.env.WEBHOOK || "[]"
+        Webhook: process.env.CUSTOM_WEBHOOK || "[]"
     },
     BaseURL: {
         PayProvider: {
