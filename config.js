@@ -4,6 +4,7 @@ module.exports = {
     System: {
         Port: process.env.PORT,
         Mode: process.env.MODE === "development" ? true: false,
+        Webhook: process.env.WEBHOOK || "[]"
     },
     BaseURL: {
         PayProvider: {
@@ -18,7 +19,12 @@ module.exports = {
                 ApiKey: process.env.TRIPAY_API_KEY,
                 PrivateKey: process.env.TRIPAY_PRIVATE_KEY,
                 MerchCode: process.env.TRIPAY_MERCHANT_CODE,
-            }
+            },
+            Midtrans: {
+                ServerKey: process.env.MIDTRANS_SERVERKEY,
+                ClientKey: process.env.MIDTRANS_CLIENTKEY,
+                MerchCode: process.env.MIDTRANS_MERCHANT_CODE,
+            },
         }
     }
 }

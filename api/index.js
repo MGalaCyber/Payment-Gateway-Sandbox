@@ -32,7 +32,7 @@ function rateLimiter(req, res, next) {
 app.enable('trust proxy');
 app.use(express.json());
 app.use("/api/provider/tripay", rateLimiter, require("./party/tripay"));
-// app.use("/api/midtrans", rateLimiter, require("./api/midtrans"));
+app.use("/api/provider/midtrans", rateLimiter, require("./api/midtrans"));
 
 app.get("/", (req, res) => {
     return res.json({

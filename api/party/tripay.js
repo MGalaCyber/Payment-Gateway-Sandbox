@@ -10,9 +10,7 @@ const TRIPAY_MERCHANT_CODE = Config.SecretKey.PayProvider.Tripay.MerchCode;
 const TRIPAY_PRIVATE_KEY = Config.SecretKey.PayProvider.Tripay.PrivateKey;
 const TRIPAY_API_KEY = Config.SecretKey.PayProvider.Tripay.ApiKey;
 const TRIPAY_API_URL = Config.BaseURL.PayProvider.Tripay;
-
-const DEBUG_MODE = Config.System.Mode;
-
+const WEBHOOKS = JSON.parse(Config.System.Webhook);
 
 // Get Payment Methods
 Router.get('/payment/channel', async (req, res) => {
@@ -180,7 +178,16 @@ Router.post("/callback", async (req, res) => {
             data
         };
 
-        return res.json(genJson);
+        // Broadcast ke semua webhook
+        Promise.allSettled(WEBHOOKS.map(url =>
+            Fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(genJson)
+            })
+        )).then(() => {
+            return res.json({ success: true, message: "Callback processed successfully" });
+        });
 
     } catch (error) {
         return res.status(500).json({
