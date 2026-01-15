@@ -1,6 +1,6 @@
-const Config = require('../config');
-const express = require('express');
-require('dotenv').config();
+const Config = require("../config");
+const express = require("express");
+require("dotenv").config();
 const app = express();
 
 const PORT = Config.System.Port;
@@ -9,7 +9,7 @@ const RATE_LIMIT_WINDOW = 60 * 1000;
 const RATE_LIMIT_COUNT = 10;
 
 function rateLimiter(req, res, next) {
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     const now = Date.now();
     const record = rateLimitMap.get(ip);
 
@@ -29,19 +29,38 @@ function rateLimiter(req, res, next) {
     next();
 }
 
-app.enable('trust proxy');
+app.enable("trust proxy");
 app.use(express.json());
-app.use("/api/provider/tripay", rateLimiter, require("./party/tripay"));
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    next();
+});
+
+app.use("/api/provider/tripay", rateLimiter, require("./providers/tripay"));
+app.use("/api/provider/paypal", rateLimiter, require("./providers/paypal"));
 // app.use("/api/provider/midtrans", rateLimiter, require("./api/midtrans"));
 
 app.get("/", (req, res) => {
     return res.json({
         status: true,
         code: res.statusCode,
-        mode: process.env.MODE
-    })
-})
+        mode: process.env.MODE,
+    });
+});
 
 app.listen(PORT, async () => {
     console.log(`Server running on port ${PORT}`);
+});
+
+// handle anticrash
+process.on("uncaughtException", err => {
+    console.log(`Uncaught Exception: ${err.message}`);
+    process.exit(1);
+});
+process.on("unhandledRejection", (reason, promise) => {
+    console.log("Unhandled Rejection at:", promise, "reason:", reason);
+    process.exit(1);
 });
